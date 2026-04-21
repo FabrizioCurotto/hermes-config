@@ -1,7 +1,6 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # Hermes Agent — Docker Compose
-# Usa la imagen oficial + socket Docker (DooD)
-# No necesita construir nada — descarga la imagen pre-built
+# Imagen oficial + Docker-out-of-Docker (DooD)
 # ──────────────────────────────────────────────────────────────────────────────
 
 services:
@@ -14,14 +13,14 @@ services:
     ports:
       - "8642:8642"                      # API server OpenAI-compatible
     volumes:
-      # ── Named volume para datos persistentes ────────────────────────────────
-      - hermes-data:/opt/data
+      # ── Bind mount: apunta a tu ~/.hermes existente ────────────────────────
+      # ← Esto preserva todas tus sesiones, memoria y config
+      - ~/.hermes:/opt/data
 
       # ── Docker-out-of-Docker (DooD) ────────────────────────────────────────
       # Monta el socket de Docker del HOST para que el contenedor pueda:
       #   - docker build   → construir imágenes
       #   - docker run     → ejecutar contenedores
-      #   - docker-compose → orquestar servicios
       - /var/run/docker.sock:/var/run/docker.sock
 
     networks:
@@ -42,7 +41,7 @@ services:
     ports:
       - "9119:9119"
     volumes:
-      - hermes-data:/opt/data
+      - ~/.hermes:/opt/data
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - GATEWAY_HEALTH_URL=http://hermes:8642
@@ -56,11 +55,6 @@ services:
         limits:
           memory: 512M
           cpus: "0.5"
-
-# ── Volúmenes persistentes ────────────────────────────────────────────────────
-volumes:
-  hermes-data:                            # ← Named volume
-    driver: local
 
 # ── Red compartida ─────────────────────────────────────────────────────────────
 networks:
