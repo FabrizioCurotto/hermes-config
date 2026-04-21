@@ -1,14 +1,13 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # Hermes Agent — Docker Compose
-# Gateway + Dashboard + Docker-out-of-Docker (DooD)
-# Construye la imagen localmente desde ./Dockerfile
+# Usa la imagen oficial + socket Docker (DooD)
+# No necesita construir nada — descarga la imagen pre-built
 # ──────────────────────────────────────────────────────────────────────────────
 
 services:
   # ── Gateway: El agente ───────────────────────────────────────────────────────
   hermes:
-    build: .                              # ← Construye desde Dockerfile local
-    image: hermes-agent:local             # Tag local
+    image: nousresearch/hermes-agent:latest
     container_name: hermes
     restart: unless-stopped
     command: gateway run
@@ -36,8 +35,7 @@ services:
 
   # ── Dashboard: Interfaz web ─────────────────────────────────────────────────
   hermes-dashboard:
-    build: .
-    image: hermes-agent:local
+    image: nousresearch/hermes-agent:latest
     container_name: hermes-dashboard
     restart: unless-stopped
     command: dashboard --host 0.0.0.0
