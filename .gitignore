@@ -1,0 +1,45 @@
+# ── Archivos sensibles (NUNCA subirlos) ───────────────────────────────────
+.env
+.env.*
+auth.json
+*.pem
+*.key
+secrets/
+
+# ── Datos runtime de Hermes ───────────────────────────────────────────────
+sessions/
+memories/
+skills/
+cron/
+logs/
+hooks/
+plans/
+skins/
+workspace/
+cache/
+platforms/
+
+# ── Bases de datos ─────────────────────────────────────────────────────────
+*.db
+*.db-shm
+*.db-wal
+
+# ── Docker runtime ─────────────────────────────────────────────────────────
+.docker/
+*.sock
+
+# ── IDE y OS ───────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# ── Builds y compilados ────────────────────────────────────────────────────
+build/
+dist/
+*.egg-info/
+__pycache__/
+*.pyc
+node_modules/
