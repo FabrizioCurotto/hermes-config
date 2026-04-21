@@ -1,9 +1,8 @@
 # ⚙️ Hermes Agent — Configuración
 
-Configuración base para desplegar **Hermes Agent** con Docker Compose.
+Configuración para desplegar **Hermes Agent** con Docker Compose.
 
 > ⚠️ **Este repositorio NO incluye API keys ni datos sensibles.**
-> Los archivos sensibles están en `.gitignore`.
 
 ---
 
@@ -12,10 +11,6 @@ Configuración base para desplegar **Hermes Agent** con Docker Compose.
 | Archivo | Descripción |
 |---------|-------------|
 | `docker-compose.yml` | Gateway + Dashboard + Docker-out-of-Docker |
-| `Dockerfile` | Imagen base de Hermes (con Docker CLI) |
-| `entrypoint.sh` | Script de inicio del contenedor |
-| `config.yaml.example` | Plantilla de configuración |
-| `SOUL.md` | Personalidad del agente |
 
 ---
 
@@ -26,53 +21,45 @@ Configuración base para desplegar **Hermes Agent** con Docker Compose.
 git clone https://github.com/FabrizioCurotto/hermes-config.git
 cd hermes-config
 
-# 2. Configurar variables sensibles (crear .env manualmente)
-# Editar config.yaml y crear .env con tus API keys
+# 2. Crear directorio de datos con tus API keys
+mkdir -p ~/.hermes
+cp config.yaml.example ~/.hermes/config.yaml  # O crea manualmente
+nano ~/.hermes/.env                             # Añadir tus API keys
 
-# 3. Iniciar
+# 3. Iniciar (descarga la imagen oficial + arranca contenedores)
 docker compose up -d
 
 # 4. Ver logs
 docker compose logs -f
+
+# 5. Acceder al dashboard
+open http://localhost:9119
 ```
 
 ---
 
-## 🔑 Configuración Sensible (Manual)
-
-### `.env` — API Keys y Tokens
-
-Crear en `~/.hermes/.env`:
+## 🔑 Variables necesarias en `~/.hermes/.env`
 
 ```bash
-ANTHROPIC_API_KEY=sk-ant-...
-OPENAI_API_KEY=sk-...
-TELEGRAM_BOT_TOKEN=123456:ABC-...
-```
-
-### `config.yaml` — Configuración General
-
-```bash
-cp config.yaml.example ~/.hermes/config.yaml
-# Editar con tu editor favorito
+OPENROUTER_API_KEY=sk-or-v1-tuclaveaquí
+GITHUB_TOKEN=ghp_tuclaveaquí
+TELEGRAM_BOT_TOKEN=123456789:ABCdef...
+TELEGRAM_ALLOWED_USERS=           # Tu ID de Telegram
 ```
 
 ---
 
 ## 🐳 Docker-out-of-Docker (DooD)
 
-El `docker-compose.yml` incluye el socket de Docker del host:
+El `docker-compose.yml` monta el socket de Docker del host:
 
 ```yaml
 volumes:
-  - ~/.hermes:/opt/data
+  - hermes-data:/opt/data
   - /var/run/docker.sock:/var/run/docker.sock  # ← Esto
 ```
 
-Esto permite que **Hermes Agent** pueda:
-- Construir imágenes (`docker build`)
-- Ejecutar contenedores (`docker run`)
-- Orquestar servicios (`docker-compose`)
+Esto permite que **Hermes** pueda ejecutar `docker build`, `docker run`, etc.
 
 ### Permisos en el Host
 
@@ -83,7 +70,7 @@ newgrp docker
 
 ---
 
-## 🔄 Estructura de Datos
+## 📂 Estructura de Datos
 
 ```
 ~/.hermes/
@@ -91,13 +78,9 @@ newgrp docker
 ├── config.yaml       # Config general
 ├── SOUL.md          # Personalidad del bot
 ├── sessions/        # Historial de conversaciones
-├── memories/         # Memoria persistente
-├── skills/          # Skills instalados
-├── cron/            # Tareas programadas
-├── logs/            # Logs de ejecución
-├── hooks/           # Webhooks
-├── auth.json        # Tokens OAuth (NO subir)
-└── state.db         # Base de datos
+├── memories/       # Memoria persistente
+├── skills/         # Skills instalados
+└── state.db        # Base de datos
 ```
 
 ---
