@@ -14,7 +14,7 @@ services:
       - "8642:8642"                      # API server OpenAI-compatible
     volumes:
       # ── Bind mount: apunta a tu ~/.hermes existente ────────────────────────
-      - ~/.hermes:/opt/data
+      - hermes-data:/opt/data
 
       # ── Docker-out-of-Docker (DooD) ────────────────────────────────────────
       - /var/run/docker.sock:/var/run/docker.sock
@@ -34,12 +34,11 @@ services:
     image: nousresearch/hermes-agent:latest
     container_name: hermes-dashboard
     restart: unless-stopped
-    command: dashboard --host 0.0.0.0
+    command: dashboard --host 0.0.0.0 --insecure
     ports:
       - "9119:9119"
     volumes:
-      - ~/.hermes:/opt/data
-      - /var/run/docker.sock:/var/run/docker.sock
+      - hermes-data:/opt/data
     environment:
       - GATEWAY_HEALTH_URL=http://hermes:8642
       - GATEWAY_HEALTH_TIMEOUT=3
@@ -54,6 +53,11 @@ services:
         limits:
           memory: 512M
           cpus: "0.5"
+
+volumes:
+  hermes-data:
+    external: true
+    name: data_hermes-data
 
 # ── Red compartida ─────────────────────────────────────────────────────────────
 networks:
