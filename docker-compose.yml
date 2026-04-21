@@ -1,22 +1,24 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # Hermes Agent — Docker Compose
 # Gateway + Dashboard + Docker-out-of-Docker (DooD)
+# Construye la imagen localmente desde ./Dockerfile
 # ──────────────────────────────────────────────────────────────────────────────
 
 services:
   # ── Gateway: El agente ───────────────────────────────────────────────────────
   hermes:
-    image: nousresearch/hermes-agent:latest
+    build: .                              # ← Construye desde Dockerfile local
+    image: hermes-agent:local             # Tag local
     container_name: hermes
     restart: unless-stopped
     command: gateway run
     ports:
-      - "8642:8642"         # API server OpenAI-compatible
+      - "8642:8642"                      # API server OpenAI-compatible
     volumes:
-      # ── Datos persistentes del usuario ──────────────────────────────────────
-      - ~/.hermes:/opt/data
+      # ── Named volume para datos persistentes ────────────────────────────────
+      - hermes-data:/opt/data
 
-      # ── Docker-out-of-Docker (DooD) ──────────────────────────────────────────
+      # ── Docker-out-of-Docker (DooD) ────────────────────────────────────────
       # Monta el socket de Docker del HOST para que el contenedor pueda:
       #   - docker build   → construir imágenes
       #   - docker run     → ejecutar contenedores
@@ -32,21 +34,17 @@ services:
           memory: 4G
           cpus: "2.0"
 
-    # Descomenta y-edita para pasar API keys por env (en lugar de .env):
-    # environment:
-    #   - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
-    #   - OPENAI_API_KEY=${OPENAI_API_KEY}
-
   # ── Dashboard: Interfaz web ─────────────────────────────────────────────────
   hermes-dashboard:
-    image: nousresearch/hermes-agent:latest
+    build: .
+    image: hermes-agent:local
     container_name: hermes-dashboard
     restart: unless-stopped
     command: dashboard --host 0.0.0.0
     ports:
       - "9119:9119"
     volumes:
-      - ~/.hermes:/opt/data
+      - hermes-data:/opt/data
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - GATEWAY_HEALTH_URL=http://hermes:8642
@@ -61,6 +59,12 @@ services:
           memory: 512M
           cpus: "0.5"
 
+# ── Volúmenes persistentes ────────────────────────────────────────────────────
+volumes:
+  hermes-data:                            # ← Named volume
+    driver: local
+
+# ── Red compartida ─────────────────────────────────────────────────────────────
 networks:
   hermes-net:
     driver: bridge
